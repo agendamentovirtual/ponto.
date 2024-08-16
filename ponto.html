@@ -35,7 +35,7 @@
                 const userLat = position.coords.latitude;
                 const userLon = position.coords.longitude;
 
-                fetch("http://localhost:5000/check-in", {
+                fetch("/check-in", {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
