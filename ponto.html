@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Batida de Ponto</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <h1 class="text-2xl font-bold mb-4">Batida de Ponto</h1>
+    <button
+      id="check-in-button"
+      class="px-4 py-2 bg-blue-500 text-white rounded"
+    >
+      Cheguei ao Trabalho
+    </button>
+    <p id="status" class="mt-4"></p>
+    <p id="location" class="mt-2 hidden"></p>
+
+    <script>
+      document
+        .getElementById("check-in-button")
+        .addEventListener("click", function () {
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              function (position) {
+                const userLat = position.coords.latitude;
+                const userLon = position.coords.longitude;
+
+                fetch("http://localhost:5000/check-in", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    latitude: userLat,
+                    longitude: userLon,
+                  }),
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    document.getElementById("status").textContent =
+                      data.message;
+                    if (data.message.includes("sucesso")) {
+                      document.getElementById(
+                        "location"
+                      ).textContent = `Sua localização: Latitude ${userLat}, Longitude ${userLon}`;
+                      document
+                        .getElementById("location")
+                        .classList.remove("hidden");
+                    } else {
+                      document
+                        .getElementById("location")
+                        .classList.add("hidden");
+                    }
+                  })
+                  .catch((error) => {
+                    document.getElementById("status").textContent =
+                      "Erro ao comunicar com o servidor: " + error.message;
+                  });
+              },
+              function (error) {
+                document.getElementById("status").textContent =
+                  "Erro ao obter localização: " + error.message;
+              }
+            );
+          } else {
+            document.getElementById("status").textContent =
+              "Geolocalização não é suportada pelo seu navegador.";
+          }
+        });
+    </script>
+  </body>
+</html>
